@@ -1,29 +1,34 @@
-import express from 'express';
-import { Request, Response } from 'express';
-import dotenv from 'dotenv';
-import * as process from "process";
-import { startMongo } from "@src/bd_settings";
+import express from 'express'
+import swaggerUi from 'swagger-ui-express'
+import specs from '@src/swagger-config'
+import authRouter from '@src/routes/auth'
+
+import dotenv from 'dotenv'
+import process from 'process'
+import { startMongo } from '@src/bd_settings'
 
 // Загрузка переменных окружения из файла .env
-dotenv.config();
+dotenv.config()
 
-const app = express();
+const app = express()
 const domain = process.env.DOMAIN || 'http://localhost'
-const port = process.env.PORT || 3050;
+const port = process.env.PORT || 3050
 
-app.get('/', (req: Request, res: Response) => {
-    res.send('Hello world!');
-});
+// подключение сваггер справочника по запросам
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs))
+
+// подключение роутов
+app.use('/auth', authRouter)
 
 // старт сервера поэтапно после запуска БД
-async function startServer():Promise<any> {
+async function startServer(): Promise<void> {
     // запуск подключения к БД
     await startMongo()
     // запуск express
-    app.listen(port, () => console.log(`Server start на ${domain}:${port}`));
+    app.listen(port, () => console.log(`Server start на ${domain}:${port}`))
 }
 
 // запуск сервера
-(async () => {
+;(async () => {
     await startServer()
 })()
