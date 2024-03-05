@@ -1,13 +1,14 @@
 import { Schema, model, SchemaDefinitionProperty } from 'mongoose'
 
 // 1. Create an interface representing a document in MongoDB.
-interface IUser {
+export interface IUser {
     name: string
     email: string
+    password: string
     avatar?: string
     secret: string
     confirmationCode:
-        | SchemaDefinitionProperty<string | boolean, IUser>
+        | SchemaDefinitionProperty<string | 'authorized'>
         | undefined
     qrCode?: string // Добавляем свойство для QR-кода
 }
@@ -16,16 +17,17 @@ interface IUser {
 const userSchema = new Schema<IUser>({
     name: { type: String, required: true },
     email: { type: String, required: true },
+    password: { type: String, required: true },
     avatar: String,
     secret: { type: String, required: true },
     confirmationCode: {
-        type: Schema.Types.Mixed, // Используйте Mixed для допустимости нескольких типов
+        type: Schema.Types.Mixed,
         required: true,
         validate: {
-            // validator: (value: string | boolean) => typeof value === 'string' || typeof value === 'boolean',
-            validator: (value: string | boolean) =>
-                ['string', 'boolean'].includes(typeof value),
-            message: 'Тип может быть только string or boolean',
+            validator: (value: string | 'authorized'): boolean => {
+                return typeof value === 'string' || value === 'authorized'
+            },
+            message: 'Тип может быть только string or "authorized"',
         },
     },
     qrCode: String, // Определяем свойство для QR-кода
