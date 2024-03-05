@@ -6,6 +6,7 @@ import authRouter from '@src/routes/auth'
 import dotenv from 'dotenv'
 import process from 'process'
 import { startMongo } from '@src/bd_settings'
+import path from 'path'
 
 // Загрузка переменных окружения из файла .env
 dotenv.config()
@@ -15,20 +16,14 @@ const domain = process.env.DOMAIN || 'http://localhost'
 const port = process.env.PORT || 3050
 
 app.use(express.json())
+// указываем папку со статическими файлами
+app.use(express.static(path.join(__dirname, 'src', 'static')))
 
 // подключение сваггер справочника по запросам
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs))
 
 // подключение роутов
 app.use('/auth', authRouter)
-
-// определение айпи адреса
-// app.get('/', (req, res) => {
-//     // const ip = req.ip // Получение IP-адреса пользователя из запроса
-//     const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-//
-//     res.send(ip)
-// })
 
 // старт сервера поэтапно после запуска БД
 async function startServer(): Promise<void> {

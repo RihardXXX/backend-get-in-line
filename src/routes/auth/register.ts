@@ -1,11 +1,11 @@
 import express from 'express'
 import { Request, Response } from 'express'
 import { User, IUser } from '@src/models/auth/User'
-import { generateAndSaveQRCode } from '@src/utils/yandexDisk'
 import { sendConfirmationEmail } from '@src/utils/nodemailerUtils'
 import bcrypt from 'bcrypt'
 import speakeasy from 'speakeasy'
 import { v4 as uuidv4 } from 'uuid'
+import { emailRegex } from '@src/utils/baseUtils'
 
 const registerRouter = express.Router()
 
@@ -20,12 +20,33 @@ const emailFrom = process.env.LOGIN_NODEMAILER
 /**
  * @swagger
  * /auth/register:
- *   get:
- *     summary: регистрация пользователя
- *     description: регистрируем нового пользователя
+ *   post:
+ *     summary: Регистрация пользователя
+ *     description: Регистрирует нового пользователя.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *             required:
+ *               - name
+ *               - email
+ *               - password
  *     responses:
  *       200:
- *         description: Успешный ответ. Возвращает сообщение о регистрации и токен
+ *         description: Успешная регистрация. Возвращает сообщение о регистрации и токен.
+ *       400:
+ *         description: Некорректный запрос. Отсутствуют обязательные поля или пользователь с такой почтой уже существует.
+ *       500:
+ *         description: Внутренняя ошибка сервера.
  */
 registerRouter.post('/', async (req: Request, res: Response) => {
     try {
@@ -37,12 +58,29 @@ registerRouter.post('/', async (req: Request, res: Response) => {
             })
         }
 
-        let user = await User.findOne({ email })
+        const isValidEmail = emailRegex.test(email)
 
-        if (user) {
+        if (!isValidEmail) {
+            return res.status(400).json({
+                message: 'неверный формат электронной почты',
+            })
+        }
+
+        const isUser = await User.findOne({ email })
+
+        if (isUser) {
             return res
                 .status(400)
                 .json({ message: 'Пользователь с такой почтой существует' })
+        }
+
+        const isFindName = await User.findOne({ name })
+
+        if (isFindName) {
+            return res.status(400).json({
+                message:
+                    'Пользователь с таким именем существует, смените пожалуйста имя',
+            })
         }
 
         // шифрование пароля перед сохранением в БД
@@ -52,7 +90,7 @@ registerRouter.post('/', async (req: Request, res: Response) => {
         // генерация строки для подтверждения авторизации
         const confirmationCode = uuidv4() // Генерируем код подтверждения
 
-        user = new User<IUser>({
+        const user = new User<IUser>({
             name,
             email,
             password: hashedPassword,
@@ -65,17 +103,17 @@ registerRouter.post('/', async (req: Request, res: Response) => {
         // сохранение пользователя
         await user.save()
 
-        // генерация qrcode и сохранение его как в БД так и на яндекс диске
-
         // Отправляем письмо для подтверждения регистрации
         await sendConfirmationEmail(email, confirmationCode)
+
         res.json({
             message: `Регистрация прошла успешно,
          пожалуйста подтвердите вашу авторизация кликнув на ссылку в письме от ${emailFrom}`,
         })
     } catch (err) {
-        console.error((err as Error).message) // изменение здесь
-        res.status(500).send('Server Error')
+        const message = (err as Error).message
+        console.error(message) // изменение здесь
+        res.status(500).send(`Server Error: ${message}`)
     }
 })
 

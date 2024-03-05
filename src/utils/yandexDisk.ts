@@ -13,10 +13,17 @@ const OAuthToken = process.env.YANDEX_DISK_OAUTH_TOKEN
 
 // Работа с яндекс диском
 // Функция для генерации и сохранения QR-кода
+// Метод будет на фронте создавать qrcode картинку и отправлять картинку, далее бэк будет готовый файл сохранять в облако
 async function generateAndSaveQRCode(userId: string) {
     const user = await User.findById(userId)
-    if (user) {
-        const qrCodeDataUrl = await qrcode.toDataURL(`User ID: ${userId}`) // Получаем URL-адрес данных для QR-кода
+
+    if (!user) {
+        return
+    }
+
+    const qrCodeDataUrl = await qrcode.toDataURL(`User ID: ${userId}`) // Получаем URL-адрес данных для QR-кода
+
+    try {
         // Отправляем запрос на загрузку файла на Яндекс.Диск
         const response = await axios.post(
             urls.yandexDiskUrl,
@@ -26,10 +33,12 @@ async function generateAndSaveQRCode(userId: string) {
             },
             {
                 headers: {
-                    Authorization: OAuthToken, // Укажите ваш OAuth токен для доступа к API Яндекс.Диска
+                    Authorization: `OAuth ${OAuthToken}`, // Укажите ваш OAuth токен для доступа к API Яндекс.Диска
                 },
             },
         )
+
+        console.log(response)
 
         // Если загрузка прошла успешно, обновляем документ пользователя с ссылкой на файл на Яндекс.Диске
         if (response.data && response.data.href) {
@@ -38,6 +47,11 @@ async function generateAndSaveQRCode(userId: string) {
         } else {
             console.error('Ошибка загрузки файла на Яндекс.Диск')
         }
+    } catch (e) {
+        console.log(112, e)
+        console.log(
+            `Ошибка сохранения картинки на яндекс диск: ${(e as Error).message}`,
+        )
     }
 }
 
