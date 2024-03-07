@@ -28,7 +28,7 @@ async function sendConfirmationEmail(email: string, confirmationCode: string) {
         to: email,
         subject: 'Подтверждение авторизации в приложении',
         html: `<p>Пожалуйста кликните по ссылке и подтвердите авторизацию в приложении get-in-line 
-                    <a href="${domain}:${port}/confirm/${confirmationCode}">подтвердить авторизацию</a>>
+                    <a href="${domain}:${port}/auth/confirm/${confirmationCode}">подтвердить авторизацию</a>>
                 </p>
                `,
     }

@@ -19,7 +19,7 @@ const emailFrom = process.env.LOGIN_NODEMAILER
 
 /**
  * @swagger
- * /auth/register:
+ * /auth/registration:
  *   post:
  *     summary: Регистрация пользователя
  *     description: Регистрирует нового пользователя.
@@ -102,6 +102,10 @@ registerRouter.post('/', async (req: Request, res: Response) => {
 
         // сохранение пользователя
         await user.save()
+
+        // // Получаем размер документа в байтах
+        // const sizeInBytes = Buffer.byteLength(JSON.stringify(user));
+        // console.log(`Размер документа в байтах: ${sizeInBytes}`);
 
         // Отправляем письмо для подтверждения регистрации
         await sendConfirmationEmail(email, confirmationCode)
