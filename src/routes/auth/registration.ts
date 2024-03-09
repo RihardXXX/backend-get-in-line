@@ -36,10 +36,13 @@ const emailFrom = process.env.LOGIN_NODEMAILER
  *                 type: string
  *               password:
  *                 type: string
+ *               phone:
+ *                 type: string
  *             required:
  *               - name
  *               - email
  *               - password
+ *               - phone
  *     responses:
  *       200:
  *         description: Успешная регистрация. Возвращает сообщение о регистрации и токен.
@@ -50,11 +53,12 @@ const emailFrom = process.env.LOGIN_NODEMAILER
  */
 registerRouter.post('/', async (req: Request, res: Response) => {
     try {
-        const { name, email, password } = req.body
+        const { name, email, password, phone } = req.body
 
-        if (!name || !email || !password) {
+        if (!name || !email || !password || !phone) {
             return res.status(400).json({
-                message: 'имя, почта и пароль являются обязательными полями ',
+                message:
+                    'имя, почта, телефон и пароль являются обязательными полями ',
             })
         }
 
@@ -83,6 +87,14 @@ registerRouter.post('/', async (req: Request, res: Response) => {
             })
         }
 
+        const isPhoneCorrect = Number(phone.length) === 11
+
+        if (!isPhoneCorrect) {
+            return res
+                .status(400)
+                .json({ message: 'Номер телефона должен состоять из 11 цифр' })
+        }
+
         // шифрование пароля перед сохранением в БД
         const hashedPassword = await bcrypt.hash(password, 10)
         // шифрование секретной фразы для одноразовых паролей
@@ -98,6 +110,7 @@ registerRouter.post('/', async (req: Request, res: Response) => {
             secret: secret.base32,
             confirmationCode,
             qrCode: '',
+            phone,
         })
 
         // сохранение пользователя
