@@ -3,7 +3,7 @@ import { Request, Response } from 'express'
 import { User } from '@src/models/auth/User'
 import bcrypt from 'bcrypt'
 import speakeasy from 'speakeasy'
-import { sendSMS } from '@src/utils/sendSms'
+import { sendOnEmail } from '@src/utils/nodemailerUtils'
 
 const loginRouter = express.Router()
 
@@ -91,19 +91,23 @@ loginRouter.post('/', async (req: Request, res: Response) => {
             return res.status(400).json({ message: 'неверный пароль' })
         }
 
-        const token = speakeasy.totp({
+        const code = speakeasy.totp({
             secret: user.secret,
             encoding: 'base32',
         })
 
         // Отправляем одноразовый пароль по SMS
-        console.log('token: ', token)
+        console.log('token: ', code)
 
-        await sendSMS(user.phone, token)
+        // await sendSms(user.phone, code)
+        await sendOnEmail(
+            email,
+            `Введи Ваш одноразовый пароль ${code} авторизации в форму `,
+        )
 
         // sendSMS(user.phone, token);
         res.json({
-            message: 'Вам отправлен одноразовый пароль, введите его в форму',
+            message: `Вам отправлен одноразовый пароль на вашу электронную почту ${email}, введите его в форму`,
         })
     } catch (err) {
         console.error((err as Error).message)

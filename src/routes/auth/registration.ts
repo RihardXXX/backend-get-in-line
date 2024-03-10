@@ -1,7 +1,7 @@
 import express from 'express'
 import { Request, Response } from 'express'
 import { User, IUser } from '@src/models/auth/User'
-import { sendConfirmationEmail } from '@src/utils/nodemailerUtils'
+import { sendOnEmail } from '@src/utils/nodemailerUtils'
 import bcrypt from 'bcrypt'
 import speakeasy from 'speakeasy'
 import { v4 as uuidv4 } from 'uuid'
@@ -16,6 +16,8 @@ import process from 'process'
 dotenv.config()
 
 const emailFrom = process.env.LOGIN_NODEMAILER
+const domain = process.env.DOMAIN
+const port = process.env.PORT
 
 /**
  * @swagger
@@ -42,7 +44,6 @@ const emailFrom = process.env.LOGIN_NODEMAILER
  *               - name
  *               - email
  *               - password
- *               - phone
  *     responses:
  *       200:
  *         description: Успешная регистрация. Возвращает сообщение о регистрации и токен.
@@ -55,10 +56,9 @@ registerRouter.post('/', async (req: Request, res: Response) => {
     try {
         const { name, email, password, phone } = req.body
 
-        if (!name || !email || !password || !phone) {
+        if (!name || !email || !password) {
             return res.status(400).json({
-                message:
-                    'имя, почта, телефон и пароль являются обязательными полями ',
+                message: 'имя, почта и пароль являются обязательными полями ',
             })
         }
 
@@ -87,13 +87,13 @@ registerRouter.post('/', async (req: Request, res: Response) => {
             })
         }
 
-        const isPhoneCorrect = Number(phone.length) === 11
-
-        if (!isPhoneCorrect) {
-            return res
-                .status(400)
-                .json({ message: 'Номер телефона должен состоять из 11 цифр' })
-        }
+        // const isPhoneCorrect = Number(phone.length) === 11
+        //
+        // if (!isPhoneCorrect) {
+        //     return res
+        //         .status(400)
+        //         .json({ message: 'Номер телефона должен состоять из 11 цифр' })
+        // }
 
         // шифрование пароля перед сохранением в БД
         const hashedPassword = await bcrypt.hash(password, 10)
@@ -110,7 +110,7 @@ registerRouter.post('/', async (req: Request, res: Response) => {
             secret: secret.base32,
             confirmationCode,
             qrCode: '',
-            phone,
+            phone: phone ?? '',
         })
 
         // сохранение пользователя
@@ -121,7 +121,11 @@ registerRouter.post('/', async (req: Request, res: Response) => {
         // console.log(`Размер документа в байтах: ${sizeInBytes}`);
 
         // Отправляем письмо для подтверждения регистрации
-        await sendConfirmationEmail(email, confirmationCode)
+        const message = `<p>Пожалуйста кликните по ссылке и подтвердите авторизацию в приложении get-in-line 
+                    <a href="${domain}:${port}/auth/confirm/${confirmationCode}">подтвердить авторизацию</a>>
+                </p>
+               `
+        await sendOnEmail(email, message)
 
         res.json({
             message: `Регистрация прошла успешно,

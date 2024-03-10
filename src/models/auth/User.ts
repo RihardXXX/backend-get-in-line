@@ -11,7 +11,7 @@ export interface IUser {
         | SchemaDefinitionProperty<string | 'authorized'>
         | undefined
     qrCode?: string // Добавляем свойство для QR-кода,
-    phone: string
+    phone?: string
 }
 
 // 2. Create a Schema corresponding to the document interface.
@@ -32,7 +32,7 @@ const userSchema = new Schema<IUser>({
         },
     },
     qrCode: String, // Определяем свойство для QR-кода
-    phone: { type: String, required: true },
+    phone: { type: String, required: false },
 })
 
 // 3. Create a Model and import

@@ -27,7 +27,6 @@
     "swagger-ui-express": "^5.0.0",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "twilio": "^4.23.0",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
