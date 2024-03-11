@@ -97,7 +97,7 @@ loginRouter.post('/', async (req: Request, res: Response) => {
         })
 
         // Отправляем одноразовый пароль по SMS
-        console.log('token: ', code)
+        // console.log('token: ', code)
 
         // await sendSms(user.phone, code)
         await sendOnEmail(

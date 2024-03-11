@@ -45,7 +45,7 @@ confirmRouter.get('/:confirmationCode', async (req: Request, res: Response) => {
         }
 
         // Подтверждаем регистрацию
-        user.confirmationCode = 'authorized'
+        user.confirmationCode = 'confirmed'
 
         // Генерация и заполнение qrCode в формате base64 после подтверждения регистрации
         const userId = String(user._id)
@@ -53,13 +53,11 @@ confirmRouter.get('/:confirmationCode', async (req: Request, res: Response) => {
 
         await user.save()
 
-        // // Получаем размер документа в байтах
+        // Получаем размер документа в байтах
         // const sizeInBytes = Buffer.byteLength(JSON.stringify(user));
         // console.log(`Размер документа в байтах: ${sizeInBytes}`);
 
-        res.send(
-            '<h2>Вы подтвердили полностью регистрацию <br> и можете полноценно приступить к работе</h2>',
-        )
+        res.send('<h2>Вы подтвердили полностью регистрацию <br> и можете полноценно приступить к работе</h2>')
     } catch (err) {
         console.error((err as Error).message)
         res.status(500).send('Ошибка подтверждения аккаунта')
