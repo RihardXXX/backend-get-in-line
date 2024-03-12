@@ -1,4 +1,4 @@
-import { User } from '@src/models/auth/User'
+import { User } from '@src/models/auth'
 import qrcode from 'qrcode' // Подключаем библиотеку для генерации QR-кода
 import axios from 'axios'
 import { urls } from '@src/api/urls'

@@ -1,9 +1,18 @@
 import express from 'express'
 import { Request, Response } from 'express'
 import speakeasy from 'speakeasy'
-import { User } from '@src/models/auth/User'
+import { User } from '@src/models/auth'
+import jwt from 'jsonwebtoken'
 
 const verifyRouter = express.Router()
+
+import dotenv from 'dotenv'
+import process from 'process'
+
+// Загрузка переменных окружения из файла .env
+dotenv.config()
+
+const jwtSecretKey = process.env.JWT_SECRET_KEY || 'foo'
 
 /**
  * @swagger
@@ -81,6 +90,15 @@ verifyRouter.post('/', async (req: Request, res: Response) => {
         // console.log('verified: ', verified)
 
         if (verified) {
+            // Генерируем JWT токен
+            const token = jwt.sign({ userId: user._id }, jwtSecretKey, {
+                expiresIn: '365d',
+            })
+
+            // Отправляем JWT в виде куки
+            // фронт не может менять куки httpOnly: true
+            res.cookie('token', token, { httpOnly: true })
+
             return res.json({ message: 'Авторизация пройдена успешно' })
         } else {
             return res.status(400).json({ message: 'Неверный код' })

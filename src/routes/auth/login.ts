@@ -1,6 +1,6 @@
 import express from 'express'
 import { Request, Response } from 'express'
-import { User } from '@src/models/auth/User'
+import { User } from '@src/models/auth'
 import bcrypt from 'bcrypt'
 import speakeasy from 'speakeasy'
 import { sendOnEmail } from '@src/utils/nodemailerUtils'

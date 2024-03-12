@@ -1,6 +1,6 @@
 import express from 'express'
 import { Request, Response } from 'express'
-import { User } from '@src/models/auth/User'
+import { User } from '@src/models/auth'
 import qrcode from 'qrcode' // Подключаем библиотеку для генерации QR-кода
 
 const confirmRouter = express.Router()
@@ -57,7 +57,9 @@ confirmRouter.get('/:confirmationCode', async (req: Request, res: Response) => {
         // const sizeInBytes = Buffer.byteLength(JSON.stringify(user));
         // console.log(`Размер документа в байтах: ${sizeInBytes}`);
 
-        res.send('<h2>Вы подтвердили полностью регистрацию <br> и можете полноценно приступить к работе</h2>')
+        res.send(
+            '<h2>Вы подтвердили полностью регистрацию <br> и можете полноценно приступить к работе</h2>',
+        )
     } catch (err) {
         console.error((err as Error).message)
         res.status(500).send('Ошибка подтверждения аккаунта')
