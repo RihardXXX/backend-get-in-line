@@ -2,6 +2,7 @@ import express from 'express'
 import swaggerUi from 'swagger-ui-express'
 import specs from '@src/swagger-config'
 import authRouter from '@src/routes/auth'
+import cookieParser from 'cookie-parser'
 
 import dotenv from 'dotenv'
 import process from 'process'
@@ -15,7 +16,8 @@ const app = express()
 const domain = process.env.DOMAIN || 'http://localhost'
 const port = process.env.PORT || 3050
 
-app.use(express.json())
+app.use(express.json()) // работа с json
+app.use(cookieParser()) // работа с cookie
 // указываем папку со статическими файлами
 app.use(express.static(path.join(__dirname, 'src', 'static')))
 

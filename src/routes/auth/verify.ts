@@ -1,7 +1,7 @@
 import express from 'express'
 import { Request, Response } from 'express'
 import speakeasy from 'speakeasy'
-import { User } from '@src/models/auth'
+import { User, Session, ISession, IUser } from '@src/models/auth'
 import jwt from 'jsonwebtoken'
 
 const verifyRouter = express.Router()
@@ -95,9 +95,24 @@ verifyRouter.post('/', async (req: Request, res: Response) => {
                 expiresIn: '365d',
             })
 
+            // сохраняем токен в сессии авторизации пользователя
+            const session = new Session<ISession>({
+                userID: user._id.toString(),
+                status: 'authorized',
+                tokenAuth: token,
+            })
+
+            await session.save()
+
             // Отправляем JWT в виде куки
             // фронт не может менять куки httpOnly: true
-            res.cookie('token', token, { httpOnly: true })
+            const oneYearMilliseconds = 24 * 60 * 60 * 1000 * 365 // один год в миллисекундах
+            const expiryDate = new Date(Date.now() + oneYearMilliseconds) // текущая дата + 1 день
+            //
+            res.cookie('token', token, {
+                httpOnly: true,
+                expires: expiryDate, // или maxAge: oneYearMilliseconds
+            })
 
             return res.json({ message: 'Авторизация пройдена успешно' })
         } else {

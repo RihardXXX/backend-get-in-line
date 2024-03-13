@@ -1,4 +1,4 @@
-import { User } from '@src/models/auth/User'
-import { Session } from '@src/models/auth/Session'
+import { User, IUser } from '@src/models/auth/User'
+import { Session, ISession } from '@src/models/auth/Session'
 
-export { User, Session }
+export { User, Session, ISession, IUser }
