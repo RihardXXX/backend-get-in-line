@@ -1,34 +1,42 @@
 import express from 'express'
 import { Request, Response } from 'express'
 import { isUserByToken } from '@src/utils/isUserByToken'
+import { User, IUser } from '@src/models/auth'
+import _ from 'lodash'
 
 const userInfoRouter = express.Router()
-
-import dotenv from 'dotenv'
-import process from 'process'
-
-// Загрузка переменных окружения из файла .env
-dotenv.config()
 
 /**
  * @swagger
  * /auth/user-info:
  *   get:
- *     summary: получение информации о пользователе на основании его кук.
- *     description: получение информации о пользователе на основании его кук.
+ *     summary: Получение информации о пользователе на основании его куки.
+ *     description: Получение информации о пользователе на основании его куки.
  *     responses:
  *       '200':
- *         description: Successful authentication.
+ *         description: Успешная аутентификация.
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 message:
- *                   type: string
- *                   description: Success message.
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                       description: Имя пользователя.
+ *                     email:
+ *                       type: string
+ *                       description: Email пользователя.
+ *                     qrCode:
+ *                       type: string
+ *                       description: QR-код пользователя.
+ *                     phone:
+ *                       type: string
+ *                       description: Телефон пользователя.
  *       '400':
- *         description: Bad request.
+ *         description: Неверный запрос.
  *         content:
  *           application/json:
  *             schema:
@@ -36,9 +44,9 @@ dotenv.config()
  *               properties:
  *                 message:
  *                   type: string
- *                   description: Error message.
+ *                   description: Сообщение об ошибке.
  *       '500':
- *         description: Internal server error.
+ *         description: Внутренняя ошибка сервера.
  *         content:
  *           application/json:
  *             schema:
@@ -46,15 +54,35 @@ dotenv.config()
  *               properties:
  *                 message:
  *                   type: string
- *                   description: Error message.
+ *                   description: Сообщение об ошибке.
  */
+
 userInfoRouter.get('/', async (req: Request, res: Response) => {
     const token = req.cookies.token
 
     try {
-        await isUserByToken(token)
+        // получаем айди пользователя с кук
+        const userId = await isUserByToken(token)
 
-        return res.json({ message: 'данные юзера прилетят сюда' })
+        if (!userId) {
+            return res.status(400).json({
+                message: 'данные в куках отсутствуют',
+            })
+        }
+
+        // находим пользователя по айди его
+        const user = await User.findOne<IUser | undefined>({ _id: userId })
+
+        if (!user) {
+            return res.status(400).json({
+                message: 'пользователь не найден',
+            })
+        }
+
+        // какие поля вернуть omit почему то дает сбой
+        const resUser = _.pick(user, ['name', 'email', 'qrCode', 'phone'])
+
+        return res.json({ user: resUser })
     } catch (e) {
         console.error((e as Error).message)
         res.status(500).send('Server Error')

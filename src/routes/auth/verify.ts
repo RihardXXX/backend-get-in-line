@@ -1,7 +1,7 @@
 import express from 'express'
 import { Request, Response } from 'express'
 import speakeasy from 'speakeasy'
-import { User, Session, ISession, IUser } from '@src/models/auth'
+import { User, Session, ISession } from '@src/models/auth'
 import jwt from 'jsonwebtoken'
 
 const verifyRouter = express.Router()
