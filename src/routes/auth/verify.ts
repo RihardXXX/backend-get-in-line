@@ -96,13 +96,25 @@ verifyRouter.post('/', async (req: Request, res: Response) => {
             })
 
             // сохраняем токен в сессии авторизации пользователя
-            const session = new Session<ISession>({
-                userID: user._id.toString(),
-                status: 'authorized',
-                tokenAuth: token,
-            })
+            // тут сделать проверку и если есть старая сессия то снести ее
 
-            await session.save()
+            // если уже сессия создана ранее и пользователь тупо удалил куку
+            // не воспользовавшись методом logout
+            // то делаем проверку и вносим токен в существующую сессию
+
+            const oldSession = await Session.findOne({ userID: user._id })
+
+            if (oldSession) {
+                oldSession.tokenAuth = token
+                await oldSession.save()
+            } else {
+                const session = new Session<ISession>({
+                    userID: user._id.toString(),
+                    status: 'authorized',
+                    tokenAuth: token,
+                })
+                await session.save()
+            }
 
             // Отправляем JWT в виде куки
             // фронт не может менять куки httpOnly: true
