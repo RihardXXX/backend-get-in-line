@@ -24,6 +24,10 @@ apiRouter.use(async (req: Request, res: Response, next: NextFunction) => {
             return next('router')
         }
 
+        // Если в методе logout мы не будем сносить сессию один раз авторизованного
+        // а будем тупо проверять на статус и токен то лучше тут добавить проверку
+        // на статус и токен
+
         next()
     } catch (e) {
         console.log((e as Error).message)
