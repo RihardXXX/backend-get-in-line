@@ -26,6 +26,10 @@ app.use(express.static(path.join(__dirname, 'src', 'static')))
 app.use('/auth', authRouter)
 app.use('/api', apiRouter)
 
+app.get('/test', (req, res) => {
+    res.json({ test: 'test' })
+})
+
 // подключение сваггер справочника по запросам
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs))
 

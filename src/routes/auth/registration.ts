@@ -128,8 +128,7 @@ registerRouter.post('/', async (req: Request, res: Response) => {
         await sendOnEmail(email, message)
 
         res.json({
-            message: `Регистрация прошла успешно,
-         пожалуйста подтвердите вашу авторизация кликнув на ссылку в письме от ${emailFrom}`,
+            message: `Регистрация прошла успешно, пожалуйста подтвердите вашу авторизация кликнув на ссылку в письме от ${emailFrom} (не забудьте проверить папку спам)`,
         })
     } catch (err) {
         const message = (err as Error).message
