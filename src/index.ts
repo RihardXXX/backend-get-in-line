@@ -1,8 +1,7 @@
 import express from 'express'
 import swaggerUi from 'swagger-ui-express'
 import specs from '@src/swagger-config'
-import authRouter from '@src/routes/auth'
-import apiRouter from '@src/routes/api'
+import baseRouter from '@src/routes'
 import cookieParser from 'cookie-parser'
 
 import dotenv from 'dotenv'
@@ -23,8 +22,7 @@ app.use(cookieParser()) // работа с cookie
 app.use(express.static(path.join(__dirname, 'src', 'static')))
 
 // подключение роутов
-app.use('/auth', authRouter)
-app.use('/api', apiRouter)
+app.use(baseRouter)
 
 app.get('/test', (req, res) => {
     res.json({ test: 'test' })

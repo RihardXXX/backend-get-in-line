@@ -56,8 +56,10 @@ registerRouter.post('/', async (req: Request, res: Response) => {
     try {
         const { name, email, password, phone } = req.body
 
+        // console.log(req.body)
+
         if (!name || !email || !password) {
-            return res.status(400).json({
+            return res.status(500).json({
                 message: 'имя, почта и пароль являются обязательными полями ',
             })
         }
@@ -65,7 +67,7 @@ registerRouter.post('/', async (req: Request, res: Response) => {
         const isValidEmail = emailRegex.test(email)
 
         if (!isValidEmail) {
-            return res.status(400).json({
+            return res.status(500).json({
                 message: 'неверный формат электронной почты',
             })
         }
@@ -74,14 +76,14 @@ registerRouter.post('/', async (req: Request, res: Response) => {
 
         if (isUser) {
             return res
-                .status(400)
+                .status(500)
                 .json({ message: 'Пользователь с такой почтой существует' })
         }
 
         const isFindName = await User.findOne({ name })
 
         if (isFindName) {
-            return res.status(400).json({
+            return res.status(500).json({
                 message:
                     'Пользователь с таким именем существует, смените пожалуйста имя',
             })
@@ -128,7 +130,7 @@ registerRouter.post('/', async (req: Request, res: Response) => {
         await sendOnEmail(email, message)
 
         res.json({
-            message: `Регистрация прошла успешно, пожалуйста подтвердите вашу авторизация кликнув на ссылку в письме от ${emailFrom} (не забудьте проверить папку спам)`,
+            message: `Регистрация прошла успешно, пожалуйста подтвердите вашу авторизацию кликнув на ссылку в письме от ${emailFrom} (не забудьте проверить папку спам)`,
         })
     } catch (err) {
         const message = (err as Error).message

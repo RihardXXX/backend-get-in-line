@@ -72,7 +72,7 @@ loginRouter.post('/', async (req: Request, res: Response) => {
         const { email, password } = req.body
 
         if (!email || !password) {
-            return res.status(400).json({
+            return res.status(500).json({
                 message: 'почта и пароль являются обязательными полями ',
             })
         }
@@ -81,23 +81,20 @@ loginRouter.post('/', async (req: Request, res: Response) => {
 
         if (!user) {
             return res
-                .status(400)
+                .status(500)
                 .json({ message: 'такой почты не существует' })
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password)
 
         if (!isPasswordValid) {
-            return res.status(400).json({ message: 'неверный пароль' })
+            return res.status(500).json({ message: 'неверный пароль' })
         }
 
         const code = speakeasy.totp({
             secret: user.secret,
             encoding: 'base32',
         })
-
-        // Отправляем одноразовый пароль по SMS
-        // console.log('token: ', code)
 
         // await sendSms(user.phone, code)
         await sendOnEmail(
