@@ -1,7 +1,7 @@
 import express from 'express'
 import { Request, Response } from 'express'
 import { User } from '@src/models/auth'
-import { RecoveryPassword, RecoveryPasswordInterface } from "@src/models/auth";
+import { RecoveryPassword, RecoveryPasswordInterface } from '@src/models/auth'
 import { emailRegex } from '@src/utils/baseUtils'
 import speakeasy from 'speakeasy'
 import { sendOnEmail } from '@src/utils/nodemailerUtils'
@@ -90,23 +90,31 @@ recoveryPasswordRouter.post('/', async (req: Request, res: Response) => {
                 .json({ message: 'Такой почты не существует' })
         }
 
+        // прежде чем сохранять новые сущности надо старые снести чтобы при след запросе при активации конфликтов не было
+        // Удаляем старые записи с тем же email
+        await RecoveryPassword.deleteMany({ email })
+
+        // шифрование секретной фразы для одноразовых паролей
+        const secret = speakeasy.generateSecret({ length: 20 })
+
+        const recoveryPassword =
+            new RecoveryPassword<RecoveryPasswordInterface>({
+                email,
+                secretKey: secret.base32, // парсинг кода будет по этому ключу в принципе необязательно было его сюда кидать
+                status: false,
+            })
+
         // генерация строки для подтверждения сменя пароля
         const code = speakeasy.totp({
-            secret: email,
+            secret: recoveryPassword.secretKey,
             encoding: 'base32',
-        })
-
-        const recoveryPassword = new RecoveryPassword<RecoveryPasswordInterface>({
-            email,
-            secretKey: email, // парсинг кода будет по этому ключу в принципе необязательно было его сюда кидать
-            status: false,
         })
 
         await recoveryPassword.save()
 
         // Отправляем письмо для подтверждения регистрации
         const message = `<p>Пожалуйста кликните по ссылке и смените ваш текущий пароль
-                    <a href="${domainFrontend}:${portFrontend}/passwordRecovery/${code}">перейти на страницу смены пароля</a>
+                    <a href="${domainFrontend}:${portFrontend}/passwordRecovery/${recoveryPassword._id}-${code}">перейти на страницу смены пароля</a>
                 </p>
                 <p>
                     Внимание, если это не вы генерировали смену пароля, то не переходите по ссылке
