@@ -65,7 +65,7 @@ userInfoRouter.get('/', async (req: Request, res: Response) => {
         const userId = await isUserByToken(token)
 
         if (!userId) {
-            return res.status(400).json({
+            return res.status(500).json({
                 message: 'данные в куках отсутствуют',
             })
         }
@@ -74,7 +74,7 @@ userInfoRouter.get('/', async (req: Request, res: Response) => {
         const user = await User.findOne<IUser | undefined>({ _id: userId })
 
         if (!user) {
-            return res.status(400).json({
+            return res.status(500).json({
                 message: 'пользователь не найден',
             })
         }

@@ -1,20 +1,7 @@
 import express from 'express'
 import { Request, Response } from 'express'
-import { User } from '@src/models/auth'
-import { RecoveryPassword, RecoveryPasswordInterface } from '@src/models/auth'
-import { emailRegex } from '@src/utils/baseUtils'
+import { RecoveryPassword } from '@src/models/auth'
 import speakeasy from 'speakeasy'
-import { sendOnEmail } from '@src/utils/nodemailerUtils'
-
-import dotenv from 'dotenv'
-import process from 'process'
-
-// Загрузка переменных окружения из файла .env
-dotenv.config()
-
-const emailFrom = process.env.LOGIN_NODEMAILER
-const domainFrontend = process.env.DOMAIN_FRONTEND
-const portFrontend = process.env.PORT_FRONTEND
 
 const changePasswordRouter = express.Router()
 
@@ -74,10 +61,15 @@ changePasswordRouter.post('/', async (req: Request, res: Response) => {
         }
 
         // находим запись по айди
-        const recoveryPassword =
-            await RecoveryPassword.findOne<RecoveryPasswordInterface>({
-                _id,
+        const recoveryPassword = await RecoveryPassword.findOne({
+            _id,
+        })
+
+        if (!recoveryPassword) {
+            return res.status(500).json({
+                message: 'такая запись не найдена',
             })
+        }
 
         console.log('recoveryPassword?.secretKey', recoveryPassword?.secretKey)
         console.log('otp', otp)
@@ -99,54 +91,13 @@ changePasswordRouter.post('/', async (req: Request, res: Response) => {
             })
         }
 
-        //
-        // const isValidEmail = emailRegex.test(email)
-        //
-        // if (!isValidEmail) {
-        //     return res.status(500).json({
-        //         message: 'неверный формат электронной почты',
-        //     })
-        // }
-        //
-        // const isUser = await User.findOne({ email })
-        //
-        // if (!isUser) {
-        //     return res
-        //         .status(500)
-        //         .json({ message: 'Такой почты не существует' })
-        // }
-        //
-        // // генерация строки для подтверждения сменя пароля
-        // const code = speakeasy.totp({
-        //     secret: email,
-        //     encoding: 'base32',
-        // })
-        //
-        // // прежде чем сохранять новые сущности надо старые снести чтобы при след запросе при активации конфликтов не было
-        // // Удаляем старые записи с тем же email
-        // await RecoveryPassword.deleteMany({ email });
-        //
-        // const recoveryPassword = new RecoveryPassword<RecoveryPasswordInterface>({
-        //     email,
-        //     secretKey: email, // парсинг кода будет по этому ключу в принципе необязательно было его сюда кидать
-        //     status: false,
-        // })
-        //
-        // await recoveryPassword.save()
-        //
-        // // Отправляем письмо для подтверждения регистрации
-        // const message = `<p>Пожалуйста кликните по ссылке и смените ваш текущий пароль
-        //             <a href="${domainFrontend}:${portFrontend}/passwordRecovery/${code}">перейти на страницу смены пароля</a>
-        //         </p>
-        //         <p>
-        //             Внимание, если это не вы генерировали смену пароля, то не переходите по ссылке
-        //         </p>
-        //        `
-        // await sendOnEmail(email, message)
+        // одноразовый пароль совпал при дешифровании и поэтому и можем в записи сменить статус
+        // если статус изменен то при отправке пароля мы его сменим пользователю
+        recoveryPassword.status = true
+        await recoveryPassword.save()
 
         res.json({
-            _id,
-            otp,
+            message: 'режим смены пароля активирован',
         })
     } catch (err) {
         const message = (err as Error).message
