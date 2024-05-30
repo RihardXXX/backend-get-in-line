@@ -21,9 +21,17 @@ const port = process.env.PORT
 
 /**
  * @swagger
+ * tags:
+ *   - name: Auth
+ *     description: Маршруты для авторизации
+ */
+
+/**
+ * @swagger
  * /auth/registration:
  *   post:
  *     summary: Регистрация пользователя
+ *     tags: [Auth]
  *     description: Регистрирует нового пользователя.
  *     requestBody:
  *       required: true

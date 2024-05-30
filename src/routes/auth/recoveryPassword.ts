@@ -20,9 +20,17 @@ const recoveryPasswordRouter = express.Router()
 
 /**
  * @swagger
+ * tags:
+ *   - name: Auth
+ *     description: Маршруты для авторизации
+ */
+
+/**
+ * @swagger
  * /auth/recovery-password:
  *   post:
  *     summary: Отправка ссылки на электронную почту пользователя
+ *     tags: [Auth]
  *     description: Отправка ссылки на электронную почту пользователя
  *     requestBody:
  *       required: true

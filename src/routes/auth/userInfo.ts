@@ -8,9 +8,17 @@ const userInfoRouter = express.Router()
 
 /**
  * @swagger
+ * tags:
+ *   - name: Auth
+ *     description: Маршруты для авторизации
+ */
+
+/**
+ * @swagger
  * /auth/user-info:
  *   get:
  *     summary: Получение информации о пользователе на основании его куки.
+ *     tags: [Auth]
  *     description: Получение информации о пользователе на основании его куки.
  *     responses:
  *       '200':

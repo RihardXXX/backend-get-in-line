@@ -16,9 +16,17 @@ const jwtSecretKey = process.env.JWT_SECRET_KEY || 'foo'
 
 /**
  * @swagger
+ * tags:
+ *   - name: Auth
+ *     description: Маршруты для авторизации
+ */
+
+/**
+ * @swagger
  * /auth/verify:
  *   post:
  *     summary: подтверждение авторизации через одноразовый пароль.
+ *     tags: [Auth]
  *     description: Verifies the OTP provided by the user.
  *     requestBody:
  *       required: true

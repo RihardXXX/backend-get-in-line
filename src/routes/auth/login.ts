@@ -9,9 +9,17 @@ const loginRouter = express.Router()
 
 /**
  * @swagger
+ * tags:
+ *   - name: Auth
+ *     description: Маршруты для авторизации
+ */
+
+/**
+ * @swagger
  * /auth/login:
  *   post:
  *     summary: Аутентификация пользователя
+ *     tags: [Auth]
  *     description: Аутентификация пользователя по электронной почте и паролю. После успешной аутентификации отправляется одноразовый пароль по SMS.
  *     requestBody:
  *       required: true

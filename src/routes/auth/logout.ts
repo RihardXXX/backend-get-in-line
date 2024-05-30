@@ -7,9 +7,17 @@ const logoutRouter = express.Router()
 
 /**
  * @swagger
+ * tags:
+ *   - name: Auth
+ *     description: Маршруты для авторизации
+ */
+
+/**
+ * @swagger
  * /auth/logout:
  *   get:
  *     summary: Выход пользователя из системы.
+ *     tags: [Auth]
  *     description: Осуществляет выход пользователя из системы.
  *     responses:
  *       '200':

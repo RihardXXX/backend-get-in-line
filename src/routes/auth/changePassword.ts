@@ -7,9 +7,17 @@ const changePasswordRouter = express.Router()
 
 /**
  * @swagger
+ * tags:
+ *   - name: Auth
+ *     description: Маршруты для авторизации
+ */
+
+/**
+ * @swagger
  * /auth/change-password:
  *   post:
  *     summary: Отправка кода для активации режима смены пароля
+ *     tags: [Auth]
  *     description: Отправка кода для активации режима смены пароля
  *     requestBody:
  *       required: true

@@ -7,6 +7,7 @@ import userInfoRouter from '@src/routes/auth/userInfo'
 import logoutRouter from '@src/routes/auth/logout'
 import recoveryPasswordRouter from '@src/routes/auth/recoveryPassword'
 import changePasswordRouter from '@src/routes/auth/changePassword'
+import newPasswordRouter from '@src/routes/auth/newPassword'
 
 const authRouter = express.Router()
 
@@ -19,5 +20,6 @@ authRouter.use('/user-info', userInfoRouter)
 authRouter.use('/logout', logoutRouter)
 authRouter.use('/recovery-password', recoveryPasswordRouter)
 authRouter.use('/change-password', changePasswordRouter)
+authRouter.use('/new-password', newPasswordRouter)
 
 export default authRouter

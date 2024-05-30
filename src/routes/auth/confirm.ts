@@ -7,9 +7,17 @@ const confirmRouter = express.Router()
 
 /**
  * @swagger
+ * tags:
+ *   - name: Auth
+ *     description: Маршруты для авторизации
+ */
+
+/**
+ * @swagger
  * /auth/confirm/{confirmationCode}:
  *   get:
  *     summary: Подтверждение регистрации пользователя
+ *     tags: [Auth]
  *     description: Подтверждает регистрацию пользователя по коду подтверждения и генерирует QR-код.
  *     parameters:
  *       - in: path
